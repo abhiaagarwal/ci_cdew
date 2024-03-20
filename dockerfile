@@ -1,17 +1,18 @@
 FROM alpine:latest as stardew-base
-RUN apk --no-cache add unzip
+
+RUN apk --no-cache add unzip curl
 
 # this has been hard-linked from the actual directory of Stardew Valley on my laptop.
-ARG GAME_PATH="stardew/MacOS"
+ARG GAME_PATH="stardew/MacOS/"
 
 ADD ${GAME_PATH} "/game/StardewValley"
 
-# in a real world scenario, this would be downloaded, somehow
-ARG SMAPI_PATH="SMAPI 4.0.1 installer/internal/linux/"
+ARG SMAPI_VERSION="4.0.1"
+ARG SMAPI_PATH="SMAPI ${SMAPI_VERSION} installer"
 
-COPY ${SMAPI_PATH}/install.dat "/tmp/install.dat"
-
-RUN unzip -o /tmp/install.dat -d "/game/StardewValley"
+RUN curl -L "https://www.curseforge.com/api/v1/mods/898372/files/5196995/download" --output /tmp/smapi.zip
+RUN unzip -o /tmp/smapi.zip -d /tmp/smapi
+RUN unzip -o "/tmp/smapi/${SMAPI_PATH}/internal/linux/install.dat" -d "/game/StardewValley"
 
 RUN cp "/game/StardewValley/Stardew Valley.deps.json" "/game/StardewValley/StardewModdingAPI.deps.json" 
 
